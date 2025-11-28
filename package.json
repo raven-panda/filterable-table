@@ -1,0 +1,39 @@
+{
+  "name": "@raven_panda/filterable-table",
+  "version": "1.0.0",
+  "description": "A small filterable & paginated React table component",
+  "main": "dist/index.cjs.js",
+  "module": "dist/index.esm.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "clean": "rimraf dist",
+    "prepare": "npm run build",
+    "test": "vitest",
+    "lint": "eslint src --ext .ts,.tsx",
+    "prepublishOnly": "npm run build"
+  },
+  "peerDependencies": {
+    "react": ">=19",
+    "react-dom": ">=19"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
+    "eslint": "^9.36.0",
+    "rimraf": "^6.1.2",
+    "tsup": "^8.5.1",
+    "typescript": "~5.9.3"
+  },
+  "keywords": [
+    "react",
+    "table",
+    "filter",
+    "pagination"
+  ],
+  "license": "MIT"
+}
