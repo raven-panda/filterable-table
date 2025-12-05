@@ -11,9 +11,9 @@ This library provides a table to show simple data (string, number, dates), and c
 
 Everything you need to know is documented in the `docs` directory of this repo, into separated markdown files by category. Here's the list of the documentation available :
 
-1. [Filterable Table component](./docs/1-table-component)
-2. [Front-end data filtering / sorting](./docs/2-filters-and-pagination.md)
-3. [Styling the table](./docs/3-styling-the-table.md)
+1. [Filterable Table component](https://github.com/raven-panda/filterable-table/blob/main/docs/1-table-component.md)
+2. [Front-end data filtering / sorting](https://github.com/raven-panda/filterable-table/blob/main/docs/2-filters-and-pagination.md)
+3. [Styling the table](https://github.com/raven-panda/filterable-table/blob/main/docs/3-styling-the-table.md)
 
 ## Install, edit and build the project
 
