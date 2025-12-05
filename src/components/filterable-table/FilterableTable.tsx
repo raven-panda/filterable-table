@@ -1,21 +1,8 @@
 import { format as formatDate, isDate } from "date-format-parse";
 import { useCallback, useMemo, useState } from "react";
-import { FilterableTableFilters, FilterableTableFiltersProps, FilterableTablePagination, FilterableTablePaginationProps } from "../filterable-table-filters";
-
-export type SortDirection = "asc" | "desc" | "none";
-export type TableColumnDataType = "string" | "number" | "date";
-
-export interface FilterableTableColumn<TDataKey = string> {
-  name: string;
-  dataKey: TDataKey;
-  dataType?: TableColumnDataType;
-  disableSorting?: boolean;
-}
-export interface FilterableTableData {
-  values: {
-    [key in string]: string | undefined;
-  };
-}
+import { FilterableTableFilters, FilterableTableFiltersProps } from "../filterable-table-filters/FilterableTableFilters";
+import { FilterableTablePagination, FilterableTablePaginationProps } from "../filterable-table-filters/FilterableTablePagination";
+import { FilterableTableColumn, FilterableTableData, SortDirection } from "../../types/TableDataTypes";
 
 export interface FilterableTableProps {
   id?: string;
