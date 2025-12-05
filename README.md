@@ -32,6 +32,8 @@ Everything you need to know is documented in the `docs` directory of this repo, 
 | /types (reusable types or interfaces, not including component props interface)
   | index.ts (export the types files here)
   | [type category or namespace].ts
+| /utils (reusable utils functions, don't export them in the main index.ts in order to not get them exposed as it is unnecessary)
+  | [utils category or namespace].ts
 | index.ts (export all in components/index.ts and types.ts, and import stylesheets here)
 ```
 
