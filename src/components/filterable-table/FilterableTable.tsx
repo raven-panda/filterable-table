@@ -3,6 +3,7 @@ import { useCallback, useMemo, useState } from "react";
 import { FilterableTableFilters, FilterableTableFiltersProps } from "../filterable-table-filters/FilterableTableFilters";
 import { FilterableTablePagination, FilterableTablePaginationProps } from "../filterable-table-filters/FilterableTablePagination";
 import { FilterableTableColumn, FilterableTableData, SortDirection } from "../../types/TableDataTypes";
+import { compareDates, compareNumbers, compareStrings, normalizeForSearch, toValidDate } from "../../utils/FormatParseUtils";
 
 export interface FilterableTableProps {
   /** Id applied to the root <table> element */
@@ -67,26 +68,47 @@ export function FilterableTable({
   const [sortedColumn, setSortedColumn] = useState<{ id: string | undefined; direction: SortDirection }>({ id: undefined, direction: "none" });
 
   /**
+   * Compare two data rows for sorting
+   * @param a First data row
+   * @param b Second data row
+   * @param column Column to sort by
+   * @param direction Direction to sort (asc, desc)
+   */
+  const compareForSorting = (a: FilterableTableData, b: FilterableTableData, column: FilterableTableColumn, direction: SortDirection) => {
+    const key = String(column.dataKey);
+    const firstValue = a.values[key];
+    const secondValue = b.values[key];
+
+    let res = 0;
+    // Sort based on data type, use dataType to cast values accordingly
+    switch (column.dataType) {
+      case "number":
+        res = compareNumbers(firstValue, secondValue);
+        break;
+      case "date":
+        res = compareDates(firstValue, secondValue);
+        break;
+      case "string":
+      default:
+        res = compareStrings(firstValue, secondValue);
+        break;
+    }
+
+    // Reverse result for descending order
+    return direction === "desc" ? -res : res;
+  }
+
+  /**
    * @param data Data to sort
    * @param column Column to sort by
    * @param direction Direction to sort (asc, desc, none)
    */
   const sortData = (data: FilterableTableData[], column: FilterableTableColumn, direction: SortDirection) => {
-    data.sort((a, b) => {
-      // Invert values based on sort direction
-      const firstValue = direction === "asc" ? a.values[column.dataKey] : b.values[column.dataKey];
-      const secondValue = direction === "asc" ? b.values[column.dataKey] : a.values[column.dataKey];
+    if (!column || direction === "none") return [...data];
 
-      // Sort based on data type, use dataType to cast values accordingly
-      switch (column.dataType) {
-        case "number":
-          return (Number(firstValue) || 0) - (Number(secondValue) || 0);
-        case "date":
-          return (new Date(firstValue || 0).getTime()) - (new Date(secondValue || 0).getTime());
-        case "string":
-        default:
-          return (String(firstValue) || "").localeCompare(String(secondValue) || "");
-      }
+    return [...data].sort((a, b) => {
+      const r = compareForSorting(a, b, column, direction);
+      return r === 0 ? 0 : r;
     });
   }
 
@@ -97,25 +119,52 @@ export function FilterableTable({
     if (!useFiltering)
       return dataList;
 
-    // Filter data based on search string
-    const filteredData = dataList.filter(data => !searchString || Object.keys(data.values).some(dataKey => {
-      if (!columns.find(col => col.dataKey === dataKey)?.disableSearching) {
-        // Check if the value is a date
-        const isValueDate = data.values[dataKey] && isDate(new Date(data.values[dataKey]));
-        // To search value, format date if needed, else treat value as string
-        const valueToSearch = isValueDate
-          ? formatDate(new Date(data.values[dataKey]!), dateFormat)
-          : String(data.values[dataKey]);
-        return valueToSearch.toLowerCase().includes(searchString.toLowerCase());
+    let filteredData = dataList;
+
+    const search = (searchString ?? "").toString().trim();
+    if (search) {
+      // Create a map of columns by dataKey for quick access
+      const colByKey = new Map<string, FilterableTableColumn>();
+      const disabledSearchKeys = new Set<string>();
+
+      for (const c of columns) {
+        colByKey.set(String(c.dataKey), c);
+        if (c.disableSearching) disabledSearchKeys.add(String(c.dataKey));
       }
-    }));
+
+      const normalizedSearch = normalizeForSearch(search);
+
+      // Filter data based on search string
+      filteredData = filteredData.filter(data => Object.keys(data.values).some(dataKey => {
+        if (disabledSearchKeys.has(dataKey)) return false;
+
+        // Get raw value, and return false if null or undefined
+        const raw = data.values[dataKey];
+        if (raw === null || raw === undefined) return false;
+
+        const col = colByKey.get(dataKey);
+
+        // Special handling for date columns
+        if (col?.dataType === "date") {
+          const d = toValidDate(raw);
+          if (d) {
+            const formatted = formatDate(d, dateFormat);
+            return normalizeForSearch(String(formatted)).includes(normalizedSearch);
+          }
+          // Not a valid date -> do not exclude, fallback to string matching
+        }
+
+        // Default string matching
+        return normalizeForSearch(String(raw)).includes(normalizedSearch);
+      }));
+    };
     
     // Sort data if a sorted column is defined
     if (useSorting && sortedColumn.id) {
-      const column = columns.find(col => col.dataKey === sortedColumn.id);
+      const column = columns.find(col => String(col.dataKey) === String(sortedColumn.id));
       // Sort only if sorting is not disabled for the column
       if (column && !column.disableSorting && sortedColumn.direction !== "none")
-        sortData(filteredData, column, sortedColumn.direction);
+        return sortData(filteredData, column, sortedColumn.direction);
     }
 
     return filteredData;
@@ -197,7 +246,7 @@ export function FilterableTable({
                 rowSpan={1}
                 colSpan={1}
                 scope="col"
-                onClick={() => useSorting && !col.disableSorting && cycleThroughSortDirections(col.dataKey)}
+                onClick={() => useSorting && !col.disableSorting && cycleThroughSortDirections(String(col.dataKey))}
               >
                 {col.name}
               </th>
