@@ -2,9 +2,10 @@
   "name": "@raven_panda/filterable-table",
   "version": "1.0.0",
   "description": "A small filterable & paginated React table component",
-  "main": "dist/index.cjs.js",
-  "module": "dist/index.esm.js",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
+  "style": "dist/styles/index.css",
   "files": [
     "dist",
     "README.md"
