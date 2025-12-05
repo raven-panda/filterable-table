@@ -1,4 +1,4 @@
-**Next doc : [Front-end data filtering / sorting](./2-filters-and-pagination)**
+**Next doc : [Front-end data filtering / sorting](./2-filters-and-pagination.md)**
 
 # Filterable Table (FilterableTable) component
 
@@ -73,5 +73,5 @@ const data: FilterableTableData[] = [
 ]
 ```
 
-**Next doc : [Front-end data filtering / sorting](./2-filters-and-pagination)**
+**Next doc : [Front-end data filtering / sorting](./2-filters-and-pagination.md)**
 
