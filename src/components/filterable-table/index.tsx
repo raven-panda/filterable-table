@@ -1,9 +1,14 @@
+import { format as formatDate, isDate } from "date-format-parse";
 import { useCallback, useMemo, useState } from "react";
 import { FilterableTableFilters, FilterableTableFiltersProps, FilterableTablePagination, FilterableTablePaginationProps } from "../filterable-table-filters";
+
+export type SortDirection = "asc" | "desc" | "none";
+export type TableColumnDataType = "string" | "number" | "date";
 
 export interface FilterableTableColumn<TDataKey = string> {
   name: string;
   dataKey: TDataKey;
+  dataType?: TableColumnDataType;
   disableSorting?: boolean;
 }
 export interface FilterableTableData {
@@ -18,6 +23,7 @@ export interface FilterableTableProps {
   tableStyle?: React.CSSProperties;
   columns: FilterableTableColumn[];
   dataList?: FilterableTableData[];
+  dateFormat?: string;
   isLoading?: boolean;
   useSorting?: boolean;
   loadingIndicatorContent?: React.ReactNode;
@@ -37,6 +43,7 @@ export function FilterableTable({
   tableStyle,
   columns,
   dataList = [],
+  dateFormat = 'YYYY/MM/DD',
   isLoading = false,
   useSorting = true,
   loadingIndicatorContent = "Loading data...",
@@ -50,12 +57,57 @@ export function FilterableTable({
   const [entriesShownNumber, setEntriesShownNumber] = useState(10);
   const [pageNumber, setPageNumber] = useState(1);
   const [searchString, setSearchString] = useState<string>("");
+  const [sortedColumn, setSortedColumn] = useState<{ id: string | undefined; direction: SortDirection }>({ id: undefined, direction: "none" });
+
+  const sortData = (data: FilterableTableData[], column: FilterableTableColumn, direction: SortDirection) => {
+    data.sort((a, b) => {
+      const firstValue = direction === "asc" ? a.values[column.dataKey] : b.values[column.dataKey];
+      const secondValue = direction === "asc" ? b.values[column.dataKey] : a.values[column.dataKey];
+
+      switch (column.dataType) {
+        case "number":
+          return (Number(firstValue) || 0) - (Number(secondValue) || 0);
+        case "date":
+          return (new Date(firstValue || 0).getTime()) - (new Date(secondValue || 0).getTime());
+        case "string":
+        default:
+          return (String(firstValue) || "").localeCompare(String(secondValue) || "");
+      }
+    });
+  }
 
   // Filter data using the search string and search a match in one of the column
   const filteredDataList = useMemo(() => {
-    return dataList
-      .filter(data => !searchString || Object.keys(data.values).some(dataKey => data.values[dataKey]?.toLowerCase().includes(searchString.toLowerCase())));
-  }, [searchString, dataList]);
+    const filteredData = dataList.filter(data => !searchString || Object.keys(data.values).some(dataKey => {
+      const isValueDate = data.values[dataKey] && isDate(new Date(data.values[dataKey]));
+      const valueToSearch = isValueDate
+        ? formatDate(new Date(data.values[dataKey]!), dateFormat)
+        : String(data.values[dataKey]);
+      return valueToSearch.toLowerCase().includes(searchString.toLowerCase());
+    }));
+    
+    if (useSorting && sortedColumn.id) {
+      const column = columns.find(col => col.dataKey === sortedColumn.id);
+      if (column && !column.disableSorting && sortedColumn.direction !== "none")
+        sortData(filteredData, column, sortedColumn.direction);
+    }
+
+    return filteredData;
+  }, [searchString, dataList, columns, sortedColumn, useSorting, dateFormat]);
+
+  const cycleThroughSortDirections = (dataKey: string) => {
+    setSortedColumn(prev => {
+      const newDirection = prev.direction === "none" ? "asc" : prev.direction === "asc" ? "desc" : "none";
+      return { id: dataKey, direction: prev.id !== dataKey ? "asc" : newDirection };
+    });
+  }
+
+  const getClassNameForSortedColumn = useCallback((dataKey: string) => {
+    if (sortedColumn.id !== dataKey)
+      return "no-sorting";
+
+    return sortedColumn.direction === "asc" ? "sorting-asc" : sortedColumn.direction === "desc" ? "sorting-desc" : "no-sorting";
+  }, [sortedColumn]);
 
   const getLastShownElementIndex = useCallback(() => {
     const lastElementIndex = ((pageNumber - 1) * entriesShownNumber) + entriesShownNumber;
@@ -90,29 +142,46 @@ export function FilterableTable({
       )}
       <table id={id} className={`filterable-table ${className}`} style={tableStyle} cellSpacing={0}>
         <thead>
-          <tr>
+          <tr className="filterable-table-head-row">
             {columns.map(col => (
-              <th key={"tableCol_" + col.dataKey} className={useSorting && !col.disableSorting ? "no-sorting" : ""} tabIndex={0} aria-controls={id} rowSpan={1} colSpan={1} scope="col">{col.name}</th>
+              <th
+                key={"tableCol_" + col.dataKey}
+                className={[
+                  "filterable-table-head-cell",
+                  useSorting && !col.disableSorting ? getClassNameForSortedColumn(col.dataKey) : ""
+                ].join(" ").trim()}
+                tabIndex={0}
+                aria-controls={id}
+                rowSpan={1}
+                colSpan={1}
+                scope="col"
+                onClick={() => useSorting && !col.disableSorting && cycleThroughSortDirections(col.dataKey)}
+              >
+                {col.name}
+              </th>
             ))}
           </tr>
         </thead>
         <tbody>
           {isLoading ? (
-            <tr className="row-odd">
+            <tr className="filterable-table-row-loading row-odd">
               <td colSpan={columns.length}>{loadingIndicatorContent}</td>
             </tr>
           ) : pagedDataList.length > 0 ? pagedDataList.map((data, i) => (
-            <tr key={"tableRow_" + i} role="row" className={i % 2 === 0 ? "row-even" : "row-odd"}>
+            <tr key={"tableRow_" + i} role="row" className={["filterable-table-row", i % 2 === 0 ? "row-even" : "row-odd"].join(" ").trim()}>
               {columns.map(col => {
-                const value = data?.values[col.dataKey];
+                let value = data.values[col.dataKey];
+                if (col.dataType === "date" && value) {
+                  value = formatDate(new Date(value), dateFormat);
+                }
                 return (
-                  <td key={'colData_' + col.dataKey + i} >{value ?? '-'}</td>
+                  <td key={'colData_' + col.dataKey + i} className="filterable-table-cell">{value as string ?? '-'}</td>
                 );
               })}
             </tr>
           )) : (
             <tr className="row-odd">
-              <td colSpan={columns.length}>No data available in table</td>
+              <td colSpan={columns.length} className="filterable-table-row-no-data">No data available in table</td>
             </tr>
           )}
         </tbody>
