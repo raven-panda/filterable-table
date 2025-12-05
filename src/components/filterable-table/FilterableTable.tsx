@@ -128,7 +128,7 @@ export function FilterableTable({
         />
       )}
       <table id={id} className={`filterable-table ${className}`} style={tableStyle} cellSpacing={0}>
-        <thead>
+        <thead className="filterable-table-head">
           <tr className="filterable-table-head-row">
             {columns.map(col => (
               <th
@@ -149,7 +149,7 @@ export function FilterableTable({
             ))}
           </tr>
         </thead>
-        <tbody>
+        <tbody className="filterable-table-body">
           {isLoading ? (
             <tr className="filterable-table-row-loading row-odd">
               <td colSpan={columns.length}>{loadingIndicatorContent}</td>

@@ -13,17 +13,17 @@ export function FilterableTableFilters({
 }: FilterableTableFiltersProps) {
   return (
     <div className="filterable-table-filters">
-      <div>
+      <div className="filterable-table-filters-rows-shown">
         Show{' '}
-        <select defaultValue={defaultShownCursor ?? entriesShownCursors?.[0]} onChange={e => onEntriesShownNumberChange(parseInt(e.target.value))}>
+        <select defaultValue={defaultShownCursor ?? entriesShownCursors?.[0]} className="filterable-table-filters-rows-shown-control" onChange={e => onEntriesShownNumberChange(parseInt(e.target.value))}>
           {entriesShownCursors.map(num => (
             <option key={"entriesShownCursor_" + num} value={num}>{num}</option>
           ))}
         </select>{' '}
         entries
       </div>
-      <div>
-        Search: <input id="filterable-table-search" name="filterable-table-search" onChange={e => onSearchChange(e.target.value)} />
+      <div className="filterable-table-filters-search">
+        Search: <input id="filterable-table-search" name="filterable-table-search" className="filterable-table-filters-search-field" onChange={e => onSearchChange(e.target.value)} />
       </div>
     </div>
   )

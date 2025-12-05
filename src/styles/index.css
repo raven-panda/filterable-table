@@ -19,7 +19,7 @@
   background-color: #ffffff;
 }
 
-.filterable-table-filters {
+.filterable-table-filters, .filterable-table-pagination {
   display: flex;
   justify-content: space-between;
   width: 100%;

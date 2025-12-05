@@ -34,12 +34,12 @@ export function FilterableTablePagination({
   };
 
   return (
-    <div className="filterable-table-filters">
-      <div>Showing {dataLength > 0 ? 1 + (pageNumber - 1) * entriesShownNumber : 0} to {lastShownElementIndex} of {dataLength} entries</div>
-      <div>
-        <button onClick={goToPreviousPage}>{previousButtonContent}</button>
-        {' '}<span className="table-page-number">{pageNumber}</span>{' '}
-        <button onClick={goToNextPage}>{nextButtonContent}</button>
+    <div className="filterable-table-pagination">
+      <div className="filterable-table-pagination-display">Showing {dataLength > 0 ? 1 + (pageNumber - 1) * entriesShownNumber : 0} to {lastShownElementIndex} of {dataLength} entries</div>
+      <div className="filterable-table-pagination-controls">
+        <button onClick={goToPreviousPage} className="filterable-table-pagination-controls-previous">{previousButtonContent}</button>
+        {' '}<span className="filterable-table-pagination-page-number">{pageNumber}</span>{' '}
+        <button onClick={goToNextPage} className="filterable-table-pagination-controls-next">{nextButtonContent}</button>
       </div>
     </div>
   );
