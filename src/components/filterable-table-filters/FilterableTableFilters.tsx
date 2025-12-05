@@ -1,13 +1,17 @@
 export interface FilterableTableFiltersProps {
+  /** Default number of entries to show per page */
   defaultShownEntriesAmount?: number;
-  entriesShownOptions?: number[];
+  /** Options for number of entries to show per page */
+  entriesShownOptions: number[];
+  /** Handler for search input change */
   onSearchChange: (searchString: string) => void;
+  /** Handler for entries shown number change */
   onEntriesShownNumberChange: (entriesShownNumber: number) => void;
 }
 
 export function FilterableTableFilters({
   defaultShownEntriesAmount,
-  entriesShownOptions = [10, 25, 50, 100],
+  entriesShownOptions,
   onSearchChange,
   onEntriesShownNumberChange,
 }: FilterableTableFiltersProps) {

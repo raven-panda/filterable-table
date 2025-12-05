@@ -5,25 +5,42 @@ import { FilterableTablePagination, FilterableTablePaginationProps } from "../fi
 import { FilterableTableColumn, FilterableTableData, SortDirection } from "../../types/TableDataTypes";
 
 export interface FilterableTableProps {
+  /** Id applied to the root <table> element */
   id?: string;
+  /** CSS class applied to the root <table> element */
   className?: string;
+  /** Style applied to the root <table> element */
   tableStyle?: React.CSSProperties;
+  /** Columns to display in the table */
   columns: FilterableTableColumn[];
+  /** Data to display in the table */
   dataList?: FilterableTableData[];
+  /** Date format used for date formatting. Must be compatible with date-format-parse @see https://www.npmjs.com/package/date-format-parse */
   dateFormat?: string;
+  /** If true, show a single row with the loading indicator */
   isLoading?: boolean;
+  /** Set this to false to disable sorting completely */
   useSorting?: boolean;
+  /** Set this to false to disable filtering completely */
+  useFiltering?: boolean;
+  /** Set this to false to disable pagination completely */
+  usePagination?: boolean;
+  /** What content to display while loading */
   loadingIndicatorContent?: React.ReactNode;
+  /** Default number of entries to show per page */
   defaultShownEntriesAmount?: number;
+  /** Options for number of entries to show per page */
   entriesShownOptions?: number[];
+  /** Content for the previous page button */
   previousButtonContent?: React.ReactNode;
+  /** Content for the next page button */
   nextButtonContent?: React.ReactNode;
+  /** Allows custom filter component. Table's state and handlers are passed as props. */
   customFilterComponent?: (props: FilterableTableFiltersProps) => React.ReactNode;
+  /** Allows custom pagination component. Table's state and handlers are passed as props. */
   customPaginationComponent?: (props: FilterableTablePaginationProps) => React.ReactNode;
 }
-/**
- * @todo Make the table style more customizable
- */
+
 export function FilterableTable({
   id = "filterable-table",
   className = "",
@@ -33,24 +50,34 @@ export function FilterableTable({
   dateFormat = 'YYYY/MM/DD',
   isLoading = false,
   useSorting = true,
+  useFiltering = true,
+  usePagination = true,
   loadingIndicatorContent = "Loading data...",
   defaultShownEntriesAmount,
-  entriesShownOptions,
+  entriesShownOptions = [10, 25, 50, 100],
   previousButtonContent,
   nextButtonContent,
   customFilterComponent,
   customPaginationComponent,
 }: FilterableTableProps) {
+  // State variables
   const [entriesShownNumber, setEntriesShownNumber] = useState(10);
   const [pageNumber, setPageNumber] = useState(1);
   const [searchString, setSearchString] = useState<string>("");
   const [sortedColumn, setSortedColumn] = useState<{ id: string | undefined; direction: SortDirection }>({ id: undefined, direction: "none" });
 
+  /**
+   * @param data Data to sort
+   * @param column Column to sort by
+   * @param direction Direction to sort (asc, desc, none)
+   */
   const sortData = (data: FilterableTableData[], column: FilterableTableColumn, direction: SortDirection) => {
     data.sort((a, b) => {
+      // Invert values based on sort direction
       const firstValue = direction === "asc" ? a.values[column.dataKey] : b.values[column.dataKey];
       const secondValue = direction === "asc" ? b.values[column.dataKey] : a.values[column.dataKey];
 
+      // Sort based on data type, use dataType to cast values accordingly
       switch (column.dataType) {
         case "number":
           return (Number(firstValue) || 0) - (Number(secondValue) || 0);
@@ -63,25 +90,41 @@ export function FilterableTable({
     });
   }
 
-  // Filter data using the search string and search a match in one of the column
+  /**
+   * Filtered data using the search string and search a match in one of the column
+   */
   const filteredDataList = useMemo(() => {
+    if (!useFiltering)
+      return dataList;
+
+    // Filter data based on search string
     const filteredData = dataList.filter(data => !searchString || Object.keys(data.values).some(dataKey => {
-      const isValueDate = data.values[dataKey] && isDate(new Date(data.values[dataKey]));
-      const valueToSearch = isValueDate
-        ? formatDate(new Date(data.values[dataKey]!), dateFormat)
-        : String(data.values[dataKey]);
-      return valueToSearch.toLowerCase().includes(searchString.toLowerCase());
+      if (!columns.find(col => col.dataKey === dataKey)?.disableSearching) {
+        // Check if the value is a date
+        const isValueDate = data.values[dataKey] && isDate(new Date(data.values[dataKey]));
+        // To search value, format date if needed, else treat value as string
+        const valueToSearch = isValueDate
+          ? formatDate(new Date(data.values[dataKey]!), dateFormat)
+          : String(data.values[dataKey]);
+        return valueToSearch.toLowerCase().includes(searchString.toLowerCase());
+      }
     }));
     
+    // Sort data if a sorted column is defined
     if (useSorting && sortedColumn.id) {
       const column = columns.find(col => col.dataKey === sortedColumn.id);
+      // Sort only if sorting is not disabled for the column
       if (column && !column.disableSorting && sortedColumn.direction !== "none")
         sortData(filteredData, column, sortedColumn.direction);
     }
 
     return filteredData;
-  }, [searchString, dataList, columns, sortedColumn, useSorting, dateFormat]);
+  }, [searchString, dataList, columns, sortedColumn, useSorting, dateFormat, useFiltering]);
 
+  /**
+   * Cycle through sort directions for a column
+   * @param dataKey Column data key to cycle sort direction for. If different from current sorted column, set to ascending.
+   */
   const cycleThroughSortDirections = (dataKey: string) => {
     setSortedColumn(prev => {
       const newDirection = prev.direction === "none" ? "asc" : prev.direction === "asc" ? "desc" : "none";
@@ -89,6 +132,10 @@ export function FilterableTable({
     });
   }
 
+  /**
+   * Get class name for sorted column header
+   * @param dataKey Column data key
+   */
   const getClassNameForSortedColumn = useCallback((dataKey: string) => {
     if (sortedColumn.id !== dataKey)
       return "no-sorting";
@@ -96,6 +143,9 @@ export function FilterableTable({
     return sortedColumn.direction === "asc" ? "sorting-asc" : sortedColumn.direction === "desc" ? "sorting-desc" : "no-sorting";
   }, [sortedColumn]);
 
+  /**
+   * Get last shown element index based on current page and entries shown number
+   */
   const getLastShownElementIndex = useCallback(() => {
     const lastElementIndex = ((pageNumber - 1) * entriesShownNumber) + entriesShownNumber;
     if (lastElementIndex > filteredDataList.length)
@@ -104,11 +154,16 @@ export function FilterableTable({
       return lastElementIndex;
   }, [filteredDataList, entriesShownNumber, pageNumber])
 
-  // Slice for page filtering
+  /**
+   * Slice for page filtering
+   */
   const pagedDataList = useMemo(() => {
+    if (!usePagination)
+      return filteredDataList;
+
     return filteredDataList
       .slice((pageNumber - 1) * entriesShownNumber, getLastShownElementIndex());
-  }, [filteredDataList, pageNumber, entriesShownNumber, getLastShownElementIndex]);
+  }, [filteredDataList, pageNumber, entriesShownNumber, getLastShownElementIndex, usePagination]);
 
   return (
     <>

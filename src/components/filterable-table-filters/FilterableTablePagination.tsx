@@ -1,10 +1,17 @@
 export interface FilterableTablePaginationProps {
+  /** Current filtered data (before pagination) length */
   dataLength: number;
+  /** Number of entries shown per page */
   entriesShownNumber: number;
-  lastShownElementIndex: number,
+  /** Index of the last shown element on the current page */
+  lastShownElementIndex: number;
+  /** Current page number */
   pageNumber: number;
+  /** Handler for page number change */
   onPageNumberChange: (pageNumber: number) => void;
+  /** Content for previous button */
   previousButtonContent?: React.ReactNode;
+  /** Content for next button */
   nextButtonContent?: React.ReactNode;
 }
 
@@ -17,18 +24,28 @@ export function FilterableTablePagination({
   previousButtonContent = "Previous",
   nextButtonContent = "Next",
 }: FilterableTablePaginationProps) {
+  /**
+   * If not on first page, go to previous page
+   */
   const goToPreviousPage = () => {
     if (pageNumber !== 1) {
       handlePageNumberChange(pageNumber - 1);
     }
   };
 
+  /**
+   * If more data is available, go to next page
+   */
   const goToNextPage = () => {
     if (dataLength > entriesShownNumber * pageNumber) {
       handlePageNumberChange(pageNumber + 1);
     }
   };
 
+  /**
+   * Handle page number change, calls `onPageNumberChange` prop
+   * @param newPageNumber New page number to set
+   */
   const handlePageNumberChange = (newPageNumber: number) => {
     onPageNumberChange?.(newPageNumber);
   };
