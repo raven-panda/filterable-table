@@ -4,6 +4,7 @@ import { FilterableTableFilters, FilterableTableFiltersProps, FilterableTablePag
 export interface FilterableTableColumn<TDataKey = string> {
   name: string;
   dataKey: TDataKey;
+  disableSorting?: boolean;
 }
 export interface FilterableTableData {
   values: {
@@ -18,6 +19,7 @@ export interface FilterableTableProps {
   columns: FilterableTableColumn[];
   dataList?: FilterableTableData[];
   isLoading?: boolean;
+  useSorting?: boolean;
   loadingIndicatorContent?: React.ReactNode;
   defaultShownCursor?: number;
   entriesShownCursors?: number[];
@@ -36,6 +38,7 @@ export function FilterableTable({
   columns,
   dataList = [],
   isLoading = false,
+  useSorting = true,
   loadingIndicatorContent = "Loading data...",
   defaultShownCursor,
   entriesShownCursors,
@@ -89,7 +92,7 @@ export function FilterableTable({
         <thead>
           <tr>
             {columns.map(col => (
-              <th key={"tableCol_" + col.dataKey} className="no-sorting" tabIndex={0} aria-controls={id} rowSpan={1} colSpan={1} scope="col">{col.name}</th>
+              <th key={"tableCol_" + col.dataKey} className={useSorting && !col.disableSorting ? "no-sorting" : ""} tabIndex={0} aria-controls={id} rowSpan={1} colSpan={1} scope="col">{col.name}</th>
             ))}
           </tr>
         </thead>
