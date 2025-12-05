@@ -14,8 +14,8 @@ export interface FilterableTableProps {
   isLoading?: boolean;
   useSorting?: boolean;
   loadingIndicatorContent?: React.ReactNode;
-  defaultShownCursor?: number;
-  entriesShownCursors?: number[];
+  defaultShownEntriesAmount?: number;
+  entriesShownOptions?: number[];
   previousButtonContent?: React.ReactNode;
   nextButtonContent?: React.ReactNode;
   customFilterComponent?: (props: FilterableTableFiltersProps) => React.ReactNode;
@@ -34,8 +34,8 @@ export function FilterableTable({
   isLoading = false,
   useSorting = true,
   loadingIndicatorContent = "Loading data...",
-  defaultShownCursor,
-  entriesShownCursors,
+  defaultShownEntriesAmount,
+  entriesShownOptions,
   previousButtonContent,
   nextButtonContent,
   customFilterComponent,
@@ -116,15 +116,15 @@ export function FilterableTable({
         customFilterComponent({
           onEntriesShownNumberChange: setEntriesShownNumber,
           onSearchChange: setSearchString,
-          defaultShownCursor,
-          entriesShownCursors,
+          defaultShownEntriesAmount,
+          entriesShownOptions,
         })
       ) : (
         <FilterableTableFilters
           onEntriesShownNumberChange={setEntriesShownNumber}
           onSearchChange={setSearchString}
-          defaultShownCursor={defaultShownCursor}
-          entriesShownCursors={entriesShownCursors}
+          defaultShownEntriesAmount={defaultShownEntriesAmount}
+          entriesShownOptions={entriesShownOptions}
         />
       )}
       <table id={id} className={`filterable-table ${className}`} style={tableStyle} cellSpacing={0}>
