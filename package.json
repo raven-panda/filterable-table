@@ -23,6 +23,7 @@
     "clean": "rimraf dist",
     "prepare": "npm run build",
     "test": "vitest",
+    "test:coverage": "vitest --coverage",
     "lint": "eslint src --ext .ts,.tsx",
     "prepublishOnly": "npm run build"
   },
@@ -42,6 +43,8 @@
     "date-format-parse": "^0.2.7",
     "eslint": "^9.36.0",
     "jsdom": "^27.3.0",
+    "react": ">=19",
+    "react-dom": ">=19",
     "rimraf": "^6.1.2",
     "tsup": "^8.5.1",
     "typescript": "~5.9.3",
