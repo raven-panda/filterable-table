@@ -27,17 +27,25 @@
     "prepublishOnly": "npm run build"
   },
   "peerDependencies": {
+    "date-format-parse": "^0.2.7",
     "react": ">=19",
-    "react-dom": ">=19",
-    "date-format-parse": "^0.2.7"
+    "react-dom": ">=19"
   },
   "devDependencies": {
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.1",
+    "@testing-library/user-event": "^14.6.1",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
+    "@vitest/coverage-v8": "^4.0.16",
+    "date-format-parse": "^0.2.7",
     "eslint": "^9.36.0",
+    "jsdom": "^27.3.0",
     "rimraf": "^6.1.2",
     "tsup": "^8.5.1",
-    "typescript": "~5.9.3"
+    "typescript": "~5.9.3",
+    "vitest": "^4.0.16"
   },
   "keywords": [
     "react",
@@ -45,5 +53,8 @@
     "filter",
     "pagination"
   ],
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "package.json": "^2.0.1"
+  }
 }
