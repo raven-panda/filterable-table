@@ -17,18 +17,19 @@ export function FilterableTableFilters({
 }: FilterableTableFiltersProps) {
   return (
     <div className="filterable-table-filters">
-      <div className="filterable-table-filters-rows-shown">
+      <label className="filterable-table-filters-rows-shown" htmlFor="filterable-table-filters-rows-shown-control">
         Show{' '}
-        <select defaultValue={defaultShownEntriesAmount ?? entriesShownOptions?.[0]} className="filterable-table-filters-rows-shown-control" onChange={e => onEntriesShownNumberChange(parseInt(e.target.value))}>
+        <select id="filterable-table-filters-rows-shown-control" name="filterable-table-filters-rows-shown-control" defaultValue={defaultShownEntriesAmount ?? entriesShownOptions?.[0]} className="filterable-table-filters-rows-shown-control" onChange={e => onEntriesShownNumberChange(parseInt(e.target.value))}>
           {entriesShownOptions.map(num => (
             <option key={"entriesShownCursor_" + num} value={num}>{num}</option>
           ))}
         </select>{' '}
         entries
-      </div>
-      <div className="filterable-table-filters-search">
-        Search: <input id="filterable-table-search" name="filterable-table-search" className="filterable-table-filters-search-field" onChange={e => onSearchChange(e.target.value)} />
-      </div>
+      </label>
+      <label htmlFor="filterable-table-search" className="filterable-table-filters-search">
+        Search :{' '}
+        <input id="filterable-table-search" name="filterable-table-search" className="filterable-table-filters-search-field" onChange={e => onSearchChange(e.target.value)} />
+      </label>
     </div>
   )
 };
