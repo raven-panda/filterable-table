@@ -1,6 +1,6 @@
 {
   "name": "@raven_panda/filterable-table",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": "Ambroise Maire <ambroise.maire7@gmail.com>",
   "description": "A small filterable & paginated React table component",
   "repository": {
