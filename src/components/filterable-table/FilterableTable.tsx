@@ -223,7 +223,7 @@ export function FilterableTable({
           defaultShownEntriesAmount,
           entriesShownOptions,
         })
-      ) : (
+      ) : useFiltering && (
         <FilterableTableFilters
           onEntriesShownNumberChange={setEntriesShownNumber}
           onSearchChange={setSearchString}
@@ -233,10 +233,11 @@ export function FilterableTable({
       )}
       <table id={id} className={`filterable-table ${className}`} style={tableStyle} cellSpacing={0}>
         <thead className="filterable-table-head">
-          <tr className="filterable-table-head-row">
+          <tr className="filterable-table-head-row" role="rowheader" data-testid="filterableTableHeadRow">
             {columns.map(col => (
               <th
                 key={"tableCol_" + col.dataKey}
+                data-testid={"cellhead" + col.dataKey}
                 className={[
                   "filterable-table-head-cell",
                   useSorting && !col.disableSorting ? getClassNameForSortedColumn(col.dataKey) : ""
@@ -287,7 +288,7 @@ export function FilterableTable({
           previousButtonContent,
           nextButtonContent,
         })
-      ) : (
+      ) : usePagination && (
         <FilterableTablePagination
           dataLength={filteredDataList.length}
           lastShownElementIndex={getLastShownElementIndex()}
